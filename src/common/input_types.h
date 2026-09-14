@@ -24,7 +24,7 @@ enum class InputType : uint8_t {
   RotateLeft,
   RotateRight,
   Enter,
-  Back
+  Back,
 
   ButtonIncrement,
   ButtonDecrement

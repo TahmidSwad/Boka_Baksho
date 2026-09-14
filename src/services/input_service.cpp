@@ -11,9 +11,6 @@ static Button back_button;
 bool InputService::Begin() {
   rotary_encoder.Begin(config::pins::EncoderClk, config::pins::EncoderDt);
   enter_button.Begin(config::pins::ButtonEnter);
-  increment_button.Begin(config::pins::ButtonIncrement);
-  decrement_button.Begin(config::pins::ButtonDecrement);
-
   back_button.Begin(config::pins::ButtonBack);
   increment_button.Begin(config::pins::ButtonIncrement);
   decrement_button.Begin(config::pins::ButtonDecrement);
@@ -28,13 +25,6 @@ void InputService::Poll() {
   if (config::kInvertEncoder) delta = -delta;
 
   while (delta > 0) {
-  if (increment_button.WasPressed()) {
-    PostInput(InputType::ButtonIncrement);
-  }
-  if (decrement_button.WasPressed()) {
-    PostInput(InputType::ButtonDecrement);
-  }
-
     PostInput(InputType::RotateRight);
     --delta;
   }
@@ -43,19 +33,26 @@ void InputService::Poll() {
     ++delta;
   }
 
+  // Poll and check all buttons independently of encoder rotation.
   enter_button.Poll();
   if (enter_button.WasPressed()) PostInput(InputType::Enter);
 
   back_button.Poll();
   if (back_button.WasPressed()) PostInput(InputType::Back);
+
+  increment_button.Poll();
+  if (increment_button.WasPressed()) PostInput(InputType::ButtonIncrement);
+
+  decrement_button.Poll();
+  if (decrement_button.WasPressed()) PostInput(InputType::ButtonDecrement);
 }
 
 // ==========================================================
 // SERIAL DEBUG INPUT
 // ==========================================================
 // l/L rotate left, r/R rotate right, e/E enter, b/B back.
-// Lets the whole system be tested from the serial monitor
-// without any hardware connected.
+// + increment, - decrement. Lets the whole system be tested
+// from the serial monitor without any hardware connected.
 // ==========================================================
 
 void InputService::PollSerialDebug() {
@@ -66,11 +63,6 @@ void InputService::PollSerialDebug() {
       case 'L':
         PostInput(InputType::RotateLeft);
         break;
-  } else if (c == '+') {
-    PostInput(InputType::ButtonIncrement);
-  } else if (c == '-') {
-    PostInput(InputType::ButtonDecrement);
-
       case 'r':
       case 'R':
         PostInput(InputType::RotateRight);
@@ -82,6 +74,12 @@ void InputService::PollSerialDebug() {
       case 'b':
       case 'B':
         PostInput(InputType::Back);
+        break;
+      case '+':
+        PostInput(InputType::ButtonIncrement);
+        break;
+      case '-':
+        PostInput(InputType::ButtonDecrement);
         break;
       default:
         break;

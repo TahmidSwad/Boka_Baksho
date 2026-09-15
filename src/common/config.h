@@ -13,17 +13,15 @@ namespace config {
 // HARDWARE PINS
 // ==========================================================
 namespace pins {
-  // Rotary encoder (quadrature CLK / DT signals).
-  constexpr uint8_t EncoderClk = 26;
-  constexpr uint8_t EncoderDt = 25;
+  // Navigation buttons:
+  //   Increment button -> RotateRight
+  //   Decrement button -> RotateLeft
+  constexpr uint8_t ButtonIncrement = 26;
+  constexpr uint8_t ButtonDecrement = 25;
 
   // Menu buttons (INPUT_PULLUP, connect to GND).
   constexpr uint8_t ButtonEnter = 27;
   constexpr uint8_t ButtonBack = 14;
-
-  // Increment and Decrement buttons (INPUT_PULLUP, connect to GND).
-  constexpr uint8_t ButtonIncrement = 32;
-  constexpr uint8_t ButtonDecrement = 33;
 
 
   // OLED display (I2C: SDA / SCL).
@@ -40,9 +38,6 @@ namespace display {
   // Fallback for clones that use the alternate address.
   constexpr uint8_t I2cAddrFallback = 0x3D;
 }
-
-// Flip to true if the encoder direction feels inverted.
-constexpr bool kInvertEncoder = false;
 
 // ==========================================================
 // LYRICS

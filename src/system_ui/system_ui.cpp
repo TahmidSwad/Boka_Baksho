@@ -22,11 +22,13 @@ bool SystemUi::HandleInput(const InputEvent& event) {
   if (count == 0) return false;
 
   switch (event.type) {
+    case InputType::ButtonDecrement:
     case InputType::RotateLeft:
       selection_ = (selection_ == 0) ? (uint8_t)(count - 1)
-                                     : (uint8_t)(selection_ - 1);
+                                      : (uint8_t)(selection_ - 1);
       return ShowMenu();
 
+    case InputType::ButtonIncrement:
     case InputType::RotateRight:
       selection_ = (uint8_t)((selection_ + 1) % count);
       return ShowMenu();
@@ -38,7 +40,6 @@ bool SystemUi::HandleInput(const InputEvent& event) {
     }
 
     case InputType::Back:
-      // Root of the navigation stack: nothing to pop.
       return false;
   }
   return true;

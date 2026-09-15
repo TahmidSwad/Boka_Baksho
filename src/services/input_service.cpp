@@ -5,11 +5,10 @@
 
 InputService input_service;
 
-static Button enter_button;
-static Button back_button;
-
 bool InputService::Begin() {
-  rotary_encoder.Begin(config::pins::EncoderClk, config::pins::EncoderDt);
+  // Buttons on the original navigation pins (26, 25):
+  //   Increment (pin 26) -> RotateRight
+  //   Decrement (pin 25) -> RotateLeft
   enter_button.Begin(config::pins::ButtonEnter);
   back_button.Begin(config::pins::ButtonBack);
   increment_button.Begin(config::pins::ButtonIncrement);
@@ -18,33 +17,21 @@ bool InputService::Begin() {
 }
 
 void InputService::Poll() {
-  // Sample CLK (and DT) in the main loop, no interrupt.
-  rotary_encoder.Poll();
-
-  int delta = rotary_encoder.ReadDelta();
-  if (config::kInvertEncoder) delta = -delta;
-
-  while (delta > 0) {
-    PostInput(InputType::RotateRight);
-    --delta;
-  }
-  while (delta < 0) {
-    PostInput(InputType::RotateLeft);
-    ++delta;
+  increment_button.Poll();
+  if (increment_button.WasPressed()) {
+    PostInput(InputType::ButtonIncrement);
   }
 
-  // Poll and check all buttons independently of encoder rotation.
+  decrement_button.Poll();
+  if (decrement_button.WasPressed()) {
+    PostInput(InputType::ButtonDecrement);
+  }
+
   enter_button.Poll();
   if (enter_button.WasPressed()) PostInput(InputType::Enter);
 
   back_button.Poll();
   if (back_button.WasPressed()) PostInput(InputType::Back);
-
-  increment_button.Poll();
-  if (increment_button.WasPressed()) PostInput(InputType::ButtonIncrement);
-
-  decrement_button.Poll();
-  if (decrement_button.WasPressed()) PostInput(InputType::ButtonDecrement);
 }
 
 // ==========================================================

@@ -92,9 +92,13 @@ void DisplayService::ShowLines(const DisplayRequest& req) {
   int16_t line_height = oled.GetTextHeight();
   int16_t total_height = req.line_count * line_height;
   int16_t start_y = (oled.Height() - total_height) / 2 + line_height;
+  bool has_selection = req.selected < req.line_count;
   for (uint8_t i = 0; i < req.line_count; ++i) {
-    int16_t x = CalculateX(req.lines[i], req.alignment);
     int16_t y = start_y + i * line_height;
+    if (has_selection && i == req.selected) {
+      oled.DrawText(0, y, ">");
+    }
+    int16_t x = has_selection ? 10 : CalculateX(req.lines[i], req.alignment);
     oled.DrawText(x, y, req.lines[i]);
   }
   oled.Update();
@@ -112,23 +116,29 @@ void DisplayService::ShowAppMenu(const DisplayRequest& req) {
   uint8_t count = req.line_count;
   uint8_t sel = (req.selected < count) ? req.selected : (uint8_t)(count - 1);
   const char* prev_name = (count > 1) ? req.lines[(sel + count - 1) % count] : nullptr;
-  const char* next_name = (count > 1) ? req.lines[(sel + 1) % count] : nullptr;
   const char* current_name = req.lines[sel];
+  const char* next_name = (count > 1) ? req.lines[(sel + 1) % count] : nullptr;
 
-  constexpr int16_t topY = 8;
-
-  // Previous app (top-left).
-  oled.SetFont(Oled::Font::Small);
+  // Previous app (top, small).
   if (prev_name != nullptr) {
-    oled.DrawText(2, topY, "<");
-    oled.DrawText(10, topY, prev_name);
+    oled.SetFont(Oled::Font::Small);
+    int16_t topY = 4;
+    int16_t prevW = oled.GetTextWidth(prev_name);
+    if (prevW < oled.Width() - 12) {
+      oled.DrawText(6, topY, prev_name);
+      oled.DrawText(0, topY, "<");
+    }
   }
 
-  // Next app (top-right).
+  // Next app (top right, small).
   if (next_name != nullptr) {
-    int16_t total = oled.GetTextWidth(next_name) + 8;
-    oled.DrawText(oled.Width() - total, topY, next_name);
-    oled.DrawText(oled.Width() - 6, topY, ">");
+    oled.SetFont(Oled::Font::Small);
+    int16_t topY = 4;
+    int16_t nextW = oled.GetTextWidth(next_name);
+    if (nextW < oled.Width() - 12) {
+      oled.DrawText(oled.Width() - nextW - 6, topY, next_name);
+      oled.DrawText(oled.Width() - 6, topY, ">");
+    }
   }
 
   // Current app (center, large).

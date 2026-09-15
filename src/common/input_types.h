@@ -7,12 +7,12 @@
 // INPUT EVENT
 // ==========================================================
 // Hardware input is normalized into a small set of abstract
-// events (rotary encoder steps and the two menu buttons).
+// events (navigation button steps and the two menu buttons).
 // Every application interprets them in its own way:
 //
-//   encoder rotation  -> RotateLeft / RotateRight
-//   ENTER button      -> Enter
-//   BACK button       -> Back
+//   nav button rotation  -> RotateLeft / RotateRight
+//   ENTER button          -> Enter
+//   BACK button            -> Back
 //
 // The AppManager delivers these to the foreground app. If the
 // app returns false from HandleInput() for a Back event, the

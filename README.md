@@ -1,9 +1,9 @@
 # BoomBox2 — Lightweight Multi-App Framework (ESP32)
 
 A small multi-application OS-style framework for the **Boom Box** device:
-an ESP32 with a 128x64 SSD1306 OLED, a **rotary encoder**, and two
-buttons (ENTER / BACK). Includes a **SystemUi launcher** and a karaoke
-**Lyrics app**.
+an ESP32 with a 128x64 SSD1306 OLED, two navigation buttons
+(Increment/Decrement), and two menu buttons (ENTER / BACK).
+Includes a **SystemUi launcher** and a karaoke **Lyrics app**.
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -13,9 +13,9 @@ buttons (ENTER / BACK). Includes a **SystemUi launcher** and a karaoke
 │  Core         AppManager (registry + nav stack),     │
 │               EventBus (display / input events)      │
 │  Services     DisplayService (foreground-only draw), │
-│               InputService (encoder + buttons),      │
+│               InputService (nav buttons + menu btns),  │
 │               StorageService (LittleFS), Audio stub  │
-│  Drivers      Oled (U8g2), RotaryEncoder, Button     │
+│  Drivers      Oled (U8g2), Button                   │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -24,7 +24,7 @@ buttons (ENTER / BACK). Includes a **SystemUi launcher** and a karaoke
 - **Navigation stack** — the SystemUi launcher sits at the bottom of the
   stack. Launching an app pushes it; BACK pops it. There is always a
   foreground app.
-- **Input routing** — the encoder and buttons are normalized into
+- **Input routing** — the navigation buttons are normalized into
   `InputEvent`s (`RotateLeft`, `RotateRight`, `Enter`, `Back`) and
   delivered to the foreground app. If an app does **not** consume a
   `Back` event, the AppManager pops the stack back to the launcher.
@@ -37,7 +37,7 @@ buttons (ENTER / BACK). Includes a **SystemUi launcher** and a karaoke
 
 | Hardware       | In launcher              | In an app (examples)        |
 |----------------|--------------------------|-----------------------------|
-| encoder rotate | scroll app list          | Lyrics: switch lyric file   |
+| nav buttons    | scroll app list          | Lyrics: switch lyric file   |
 | ENTER button   | open selected app       | Lyrics: play / pause        |
 | BACK button    | (nothing, root menu)     | exit app -> launcher        |
 
@@ -54,7 +54,7 @@ BoomBox2/
     ├── main.cpp           boot, registration, main loop
     ├── common/            config, event/input/ui types
     ├── core/              app_base, app_manager, event_bus, system
-    ├── drivers/           oled, rotary encoder, button
+    ├── drivers/           oled, button
     ├── services/          display, input, storage, audio (stub)
     ├── system_ui/         launcher app
     └── apps/              lyrics, clock (+ future music/alarm/settings)
@@ -69,7 +69,7 @@ pio run -t upload           # flash firmware
 pio device monitor          # serial: logs + debug input l/r/e/b
 ```
 
-Pins (see `src/common/config.h`): encoder CLK=25, DT=26, ENTER=27, BACK=14;
+Pins (see `src/common/config.h`): Increment=26, Decrement=25, ENTER=27, BACK=14;
 OLED I2C SDA=21, SCL=22. At boot the OLED driver probes I2C address
 `0x3C`, then falls back to `0x3D`, and prints `OLED I2C: device at
 0x..` (or `OLED I2C: FAILED ...`) on serial.

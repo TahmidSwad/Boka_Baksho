@@ -19,7 +19,7 @@ public:
 // EVENT BUS
 // ==========================================================
 //
-// A simple publish‑subscribe system. Subscribers register
+// A simple publish-subscribe system. Subscribers register
 // for specific event types. Events are queued and dispatched
 // when Dispatch() is called from the main loop.
 //

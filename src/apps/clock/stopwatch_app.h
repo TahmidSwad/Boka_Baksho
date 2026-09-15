@@ -8,9 +8,9 @@
 // ==========================================================
 // STOPWATCH / TIMER APP
 // ==========================================================
-// Two modes selected by the rotary encoder:
+// Two modes selected by the navigation buttons:
 //   timer_set_min_ == 0  -> STOPWATCH (counts up from zero)
-//   timer_set_min_  > 0  -> TIMER    (counts down from the preset)
+//   timer_set_min_  > 0   -> TIMER    (counts down from the preset)
 //
 // Rotating the encoder (when stopped) sets the timer preset,
 // one minute per click, and cannot go below zero.  When the

@@ -59,7 +59,7 @@ bool StopwatchApp::HandleInput(const InputEvent& event) {
       } else if (running_) {
         running_ = false;                        // pause
       } else {
-        Start();                                 // (re)start
+        Start();                               // (re)start
       }
       Draw();
       return true;

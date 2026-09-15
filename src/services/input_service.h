@@ -4,16 +4,16 @@
 #include <Arduino.h>
 
 #include "common/input_types.h"
-#include "drivers/rotary/rotary_encoder.h"
+
 #include "drivers/button/button.h"
 
 // ==========================================================
 // INPUT SERVICE
 // ==========================================================
-// Scans the rotary encoder and the two menu buttons and posts
-// normalized InputEvents onto the EventBus. Also provides a
-// serial debug input (l / r / e / b) so the system can be
-// driven without hardware attached.
+// Scans the two navigation buttons and the two menu buttons
+// and posts normalized InputEvents onto the EventBus.
+// Also provides a serial debug input (l / r / e / b) so the
+// system can be driven without hardware attached.
 // ==========================================================
 
 class InputService {
@@ -25,9 +25,15 @@ public:
 private:
   void PostInput(InputType type);
 
+  // Navigation buttons:
+  //   Increment  -> RotateRight
+  //   Decrement  -> RotateLeft
   Button increment_button;
   Button decrement_button;
 
+  // Menu buttons (ENTER / BACK):
+  Button enter_button;
+  Button back_button;
 };
 
 extern InputService input_service;

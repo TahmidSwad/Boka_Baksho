@@ -8,6 +8,7 @@
 #include "services/display_service.h"
 #include "services/input_service.h"
 #include "services/audio_service.h"
+#include "services/ble_service.h"
 
 #include "system_ui/system_ui.h"
 #include "apps/lyrics/lyrics_app.h"
@@ -15,6 +16,8 @@
 
 // app_manager is defined in core/app_manager.cpp (see core/system.h).
 EventBus event_bus;
+
+void onBleCommand(const char* cmd);
 
 void setup() {
   Serial.begin(115200);
@@ -31,6 +34,8 @@ void setup() {
 
   input_service.Begin();
   audio_service.Begin();
+  ble_service.Begin();
+  ble_service.SetCommandCallback(onBleCommand);
 
   // Register every launchable app. The SystemUi (launcher) is
   // booted separately and never appears inside its own menu.
@@ -58,4 +63,33 @@ void loop() {
   input_service.PollSerialDebug(); // optional serial debug input
   event_bus.Dispatch();           // render display requests, route inputs
   app_manager.Update();           // pump the foreground app
+}
+
+// ==========================================================
+// BLE COMMAND HANDLER
+// ==========================================================
+
+void onBleCommand(const char* cmd) {
+  if (cmd == nullptr) return;
+
+  // Parse AUDIO_STARTED -> start lyrics from beginning
+  if (strcmp(cmd, "AUDIO_STARTED") == 0) {
+    lyrics_app.OnAudioStarted();
+  }
+  // STOPPED -> stop lyrics playback
+  else if (strcmp(cmd, "STOPPED") == 0) {
+    // lyrics_app will handle this via its own state
+  }
+  // PAUSED -> pause lyrics
+  else if (strcmp(cmd, "PAUSED") == 0) {
+    // lyrics_app handles pause internally
+  }
+  // RESUME -> resume lyrics
+  else if (strcmp(cmd, "RESUMED") == 0) {
+    // lyrics_app handles resume internally
+  }
+  // TIME_ACK|<ms> -> could sync lyric timing
+  else if (strncmp(cmd, "TIME_ACK|", 9) == 0) {
+    // Could use for synchronization if needed
+  }
 }

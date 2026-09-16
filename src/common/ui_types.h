@@ -40,6 +40,7 @@ enum class DisplayRequestType {
   ShowLines,
   ShowAppMenu,
   ShowBigTime,
+  ShowScreensaver,
   ClearDisplay
 };
 

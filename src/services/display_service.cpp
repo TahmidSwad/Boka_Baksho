@@ -43,6 +43,9 @@ void DisplayService::OnEvent(const Event& event) {
     case DisplayRequestType::ShowBigTime:
       ShowBigTime(req);
       break;
+    case DisplayRequestType::ShowScreensaver:
+      ShowScreensaver(req);
+      break;
     case DisplayRequestType::ClearDisplay:
       ClearDisplay();
       break;
@@ -148,9 +151,130 @@ void DisplayService::ShowAppMenu(const DisplayRequest& req) {
   int16_t y = (oled.Height() + oled.GetTextHeight()) / 2;
   oled.DrawText(x, y, current_name);
 
-  // Footer.
+  // Pagination dots.
   oled.SetFont(Oled::Font::Small);
-  oled.DrawText(0, oled.Height() - 8, "ENTER open  BACK exit");
+  int16_t dot_y = oled.Height() - 10;
+  int16_t dot_spacing = 8;
+  int16_t dots_width = count * dot_spacing;
+  int16_t dot_start_x = (oled.Width() - dots_width) / 2;
+  for (uint8_t i = 0; i < count; ++i) {
+    int16_t dot_x = dot_start_x + i * dot_spacing + 2;
+    if (i == sel) {
+      oled.FillRect(dot_x, dot_y, 4, 4);
+    } else {
+      oled.DrawRect(dot_x, dot_y, 4, 4);
+    }
+  }
+
+  oled.Update();
+}
+
+// ==========================================================
+// SHOW SCREENSAVER
+// ==========================================================
+// Draws the animated cat face.
+// cat_state: 0=happy, 1=blink, 2=alert, 3=neutral,
+//            4=sad, 5=sleepy, 6=angry
+// ==========================================================
+
+void DisplayService::ShowScreensaver(const DisplayRequest& req) {
+  oled.Clear();
+
+  int8_t yo = req.cat_y_offset;
+
+  // Head — wider sides, same top/risers.
+  oled.DrawLine(44, 41 + yo, 44, 17 + yo);
+  oled.DrawLine(44, 17 + yo, 52, 17 + yo);
+  oled.DrawLine(52, 17 + yo, 52, 11 + yo);
+  oled.DrawLine(52, 11 + yo,  76, 11 + yo);
+  oled.DrawLine(76, 11 + yo,  76, 17 + yo);
+  oled.DrawLine(76, 17 + yo, 84, 17 + yo);
+  oled.DrawLine(84, 17 + yo, 84, 41 + yo);
+
+  // Paws — larger squares.
+  oled.DrawRect(38, 41, 14, 14);
+  oled.DrawRect(76, 41, 14, 14);
+
+  // Connecting line between paws.
+  oled.DrawLine(52, 46, 76, 46);
+
+  // Face — eyes and mouth inside head.
+  int8_t ey = 24 + yo;
+  int8_t lo = req.paw_offset * 2;  // look offset: -2, 0, or +2
+
+  switch (req.cat_state) {
+    case 0:  // Happy — chevron ^ ^
+      oled.DrawLine(54 + lo, ey + 4, 57 + lo, ey);
+      oled.DrawLine(57 + lo, ey, 61 + lo, ey + 4);
+      oled.DrawLine(66 + lo, ey + 4, 69 + lo, ey);
+      oled.DrawLine(69 + lo, ey, 73 + lo, ey + 4);
+      break;
+    case 1:  // Blink — flat - -
+      oled.DrawLine(54 + lo, ey + 2, 61 + lo, ey + 2);
+      oled.DrawLine(66 + lo, ey + 2, 73 + lo, ey + 2);
+      break;
+    case 2:  // Alert — box eyes [] [] (same as neutral)
+      oled.DrawRect(54 + lo, ey, 7, 7);
+      oled.DrawRect(66 + lo, ey, 7, 7);
+      break;
+    case 3:  // Neutral — box eyes [] [] (default)
+      oled.DrawRect(54 + lo, ey, 7, 7);
+      oled.DrawRect(66 + lo, ey, 7, 7);
+      break;
+    case 4:  // Sad — droopy eyes
+      oled.DrawLine(54 + lo, ey, 57 + lo, ey + 4);
+      oled.DrawLine(57 + lo, ey + 4, 61 + lo, ey);
+      oled.DrawLine(66 + lo, ey, 69 + lo, ey + 4);
+      oled.DrawLine(69 + lo, ey + 4, 73 + lo, ey);
+      break;
+    case 5:  // Sleepy — same as blink
+      oled.DrawLine(54 + lo, ey + 2, 61 + lo, ey + 2);
+      oled.DrawLine(66 + lo, ey + 2, 73 + lo, ey + 2);
+      break;
+    case 6:  // Angry — x x eyes
+      oled.DrawLine(54 + lo, ey, 61 + lo, ey + 6);
+      oled.DrawLine(61 + lo, ey, 54 + lo, ey + 6);
+      oled.DrawLine(66 + lo, ey, 73 + lo, ey + 6);
+      oled.DrawLine(73 + lo, ey, 66 + lo, ey + 6);
+      break;
+  }
+
+  // Mouth — uses base_state so it doesn't change during blink.
+  int8_t mouth_y = 35 + yo;
+  switch (req.cat_base_state) {
+    case 0: {  // Happy — right, bottom, left (no top) — 1px up
+      int8_t my = mouth_y - 1;
+      oled.DrawLine(68, my, 68, my + 2);
+      oled.DrawLine(68, my + 2, 60, my + 2);
+      oled.DrawLine(60, my + 2, 60, my);
+      break;
+    }
+    case 2: {  // Alert — small open mouth — 2px down
+      int8_t my = mouth_y + 2;
+      oled.DrawRect(61, my - 1, 6, 4);
+      break;
+    }
+    case 3:  // Neutral — straight line (default)
+      oled.DrawLine(60, mouth_y, 68, mouth_y);
+      break;
+    case 4: {  // Sad — right, top, left (no bottom)
+      int8_t my = mouth_y;
+      oled.DrawLine(68, my + 2, 68, my);
+      oled.DrawLine(68, my, 60, my);
+      oled.DrawLine(60, my, 60, my + 2);
+      break;
+    }
+    case 6: {  // Angry — right, top, left (no bottom) — 1px down
+      int8_t my = mouth_y + 1;
+      oled.DrawLine(68, my + 2, 68, my);
+      oled.DrawLine(68, my, 60, my);
+      oled.DrawLine(60, my, 60, my + 2);
+      break;
+    }
+    default:  // Neutral fallback
+      oled.DrawLine(60, mouth_y, 68, mouth_y);
+      break;
+  }
 
   oled.Update();
 }

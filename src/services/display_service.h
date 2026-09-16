@@ -27,6 +27,7 @@ private:
   void ShowLines(const DisplayRequest& request);
   void ShowAppMenu(const DisplayRequest& request);
   void ShowBigTime(const DisplayRequest& request);
+  void ShowScreensaver(const DisplayRequest& request);
   void ClearDisplay();
 
   void SetFont(TextSize size);
